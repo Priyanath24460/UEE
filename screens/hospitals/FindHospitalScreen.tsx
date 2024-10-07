@@ -1,16 +1,26 @@
+// FindHospitalScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, FlatList, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Linking, // Import Linking for dialing
+} from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
+import HospitalDetailsModal from '../../components/HospitalDetailsModal'; // Import the modal
+import { MaterialIcons } from '@expo/vector-icons';
 
-// Define types for the location coordinates
+
+
 interface Coordinates {
   latitude: number;
   longitude: number;
 }
 
-// Define types for each hospital
-interface Hospital {
+interface Place {
   place_id: string;
   geometry: {
     location: {
@@ -22,36 +32,41 @@ interface Hospital {
   vicinity: string;
   roadDistance?: string;
   phoneNumber?: string;
+  openingHours?: {
+    openNow: boolean;
+    weekdayText?: string[];
+  };
 }
 
 const FindHospitalScreen: React.FC = () => {
   const [location, setLocation] = useState<Coordinates | null>(null);
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [placeType, setPlaceType] = useState<'hospital' | 'pharmacy' | 'both'>('both'); // Add state to track type selection
 
   useEffect(() => {
     (async () => {
       let currentLocation = await getUserLocation();
       if (currentLocation) {
         setLocation(currentLocation);
-        let nearbyHospitals = await findHospitals(currentLocation.latitude, currentLocation.longitude);
-        if (nearbyHospitals) {
-          let hospitalsWithDistance = await addRoadDistances(
-            currentLocation.latitude,
-            currentLocation.longitude,
-            nearbyHospitals
-          );
+        let nearbyPlaces = await findPlaces(currentLocation.latitude, currentLocation.longitude, placeType);
+        if (nearbyPlaces) {
+          let placesWithDistance = await addRoadDistances(currentLocation.latitude, currentLocation.longitude, nearbyPlaces);
 
-          hospitalsWithDistance.sort((a, b) => {
+          placesWithDistance.sort((a, b) => {
+            const openA = a.openingHours?.openNow ? 0 : 1; // open items first
+            const openB = b.openingHours?.openNow ? 0 : 1; // open items first
             const distanceA = parseFloat(a.roadDistance?.replace(' km', '') || '0');
             const distanceB = parseFloat(b.roadDistance?.replace(' km', '') || '0');
-            return distanceA - distanceB;
+            return openA - openB || distanceA - distanceB; // Sort by open status and then by distance
           });
 
-          setHospitals(hospitalsWithDistance);
+          setPlaces(placesWithDistance);
         }
       }
     })();
-  }, []);
+  }, [placeType]); // Fetch data when placeType changes
 
   const getUserLocation = async (): Promise<Coordinates | null> => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -66,54 +81,56 @@ const FindHospitalScreen: React.FC = () => {
     };
   };
 
-  const findHospitals = async (latitude: number, longitude: number): Promise<Hospital[] | undefined> => {
-    const apiKey = 'AIzaSyCtV803a3BAeHMRNxe0QVsQxC83ZGHO16k'; 
+  const findPlaces = async (latitude: number, longitude: number, type: string): Promise<Place[] | undefined> => {
+    const apiKey = 'AIzaSyCtV803a3BAeHMRNxe0QVsQxC83ZGHO16k';  // Replace with your Google API key
     const radius = 5000;
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=hospital&key=${apiKey}`;
+    const types = type === 'both' ? 'hospital|pharmacy' : type;  // Handle both selection
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${types}&key=${apiKey}`;
 
     try {
       let response = await fetch(url);
       let data = await response.json();
-      
-      const hospitals = await Promise.all(data.results.map(async (hospital: any) => {
-        const phoneNumber = await fetchHospitalDetails(hospital.place_id);
+
+      const places = await Promise.all(data.results.map(async (place: any) => {
+        const details = await fetchPlaceDetails(place.place_id);
         return {
-          ...hospital,
-          phoneNumber,
+          ...place,
+          phoneNumber: details?.phoneNumber || 'N/A',
+          openingHours: details?.openingHours ? details.openingHours : { openNow: false, weekdayText: [] },
         };
       }));
 
-      return hospitals as Hospital[];
+      return places as Place[];
     } catch (error) {
       console.error(error);
     }
   };
 
-  const fetchHospitalDetails = async (placeId: string): Promise<string | undefined> => {
-    const apiKey = 'AIzaSyCtV803a3BAeHMRNxe0QVsQxC83ZGHO16k'; 
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=formatted_phone_number&key=${apiKey}`;
+  const fetchPlaceDetails = async (placeId: string): Promise<{ phoneNumber?: string, openingHours?: { openNow: boolean, weekdayText?: string[] } } | undefined> => {
+    const apiKey = 'AIzaSyCtV803a3BAeHMRNxe0QVsQxC83ZGHO16k'; // Replace with your Google API key
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=formatted_phone_number,opening_hours&key=${apiKey}`;
 
     try {
       let response = await fetch(url);
       let data = await response.json();
-      return data.result?.formatted_phone_number || 'N/A';
+
+      return {
+        phoneNumber: data.result?.formatted_phone_number || 'N/A',
+        openingHours: data.result?.opening_hours ? {
+          openNow: data.result.opening_hours.open_now,
+          weekdayText: data.result.opening_hours.weekday_text,
+        } : undefined,
+      };
     } catch (error) {
       console.error(error);
-      return 'N/A';
+      return undefined;
     }
   };
 
-  const addRoadDistances = async (
-    userLat: number,
-    userLng: number,
-    hospitals: Hospital[]
-  ): Promise<Hospital[]> => {
-    const apiKey = 'AIzaSyCtV803a3BAeHMRNxe0QVsQxC83ZGHO16k';
-    const destinations = hospitals
-      .map(
-        (hospital) =>
-          `${hospital.geometry.location.lat},${hospital.geometry.location.lng}`
-      )
+  const addRoadDistances = async (userLat: number, userLng: number, places: Place[]): Promise<Place[]> => {
+    const apiKey = 'AIzaSyCtV803a3BAeHMRNxe0QVsQxC83ZGHO16k'; // Replace with your Google API key
+    const destinations = places
+      .map((place) => `${place.geometry.location.lat},${place.geometry.location.lng}`)
       .join('|');
 
     const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${userLat},${userLng}&destinations=${destinations}&mode=driving&key=${apiKey}`;
@@ -122,22 +139,63 @@ const FindHospitalScreen: React.FC = () => {
       let response = await fetch(url);
       let data = await response.json();
 
-      return hospitals.map((hospital, index) => {
+      return places.map((place, index) => {
         const distance = data.rows[0].elements[index].distance?.text || 'N/A';
-        return { ...hospital, roadDistance: distance };
+        return { ...place, roadDistance: distance };
       });
     } catch (error) {
       console.error(error);
-      return hospitals;
+      return places;
     }
   };
 
-  const renderHospitalItem = ({ item }: { item: Hospital }) => (
-    <TouchableOpacity style={styles.hospitalItem}>
-      <Text style={styles.hospitalName}>{item.name}</Text>
-      <Text>{item.vicinity}</Text>
-      <Text>Distance: {item.roadDistance}</Text>
-      <Text>Contact: {item.phoneNumber}</Text>
+  const handleCall = (phoneNumber: string | undefined) => {
+    if (phoneNumber && phoneNumber !== 'N/A') {
+      Linking.openURL(`tel:${phoneNumber}`);
+    } else {
+      alert('No phone number available to call.');
+    }
+  };
+
+  const handleGetLocation = (place: Place) => {
+    const lat = place.geometry.location.lat;
+    const lng = place.geometry.location.lng;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    Linking.openURL(url);
+  };
+
+  const renderPlaceItem = ({ item }: { item: Place }) => (
+    <TouchableOpacity
+      style={styles.placeItem}
+      onPress={() => {
+        setSelectedPlace(item);
+        setModalVisible(true);
+      }}
+    >
+      <View style={styles.placeInfo}>
+        <Text style={styles.placeName}>{item.name}</Text>
+        <Text>{item.vicinity}</Text>
+        <Text>Distance: {item.roadDistance}</Text>
+        <Text>Contact: {item.phoneNumber}</Text>
+        <View style={styles.twobutton}>
+        <TouchableOpacity onPress={() => handleCall(item.phoneNumber)} style={styles.callButton}>
+        <MaterialIcons name="phone" size={24} color="#ffffff" style={styles.callicon}  />
+
+          <Text style={styles.callButtonText}>Call</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleGetLocation(item)} style={styles.locationButton}>
+        <MaterialIcons name="place" size={24} color="#ffffff" style={styles.callicon} />
+
+          <Text style={styles.locationButtonText}>Location</Text>
+        </TouchableOpacity>
+        </View>
+        {/*<Text>Hours: {item.openingHours?.weekdayText?.join(', ') || 'N/A'}</Text>*/}
+      </View>
+      <View style={styles.openorNot}>
+      <Text style={item.openingHours?.openNow ? styles.openText : styles.closedText } >
+        {item.openingHours?.openNow ? 'Open' : 'Closed'}
+      </Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -146,8 +204,20 @@ const FindHospitalScreen: React.FC = () => {
       {location ? (
         <>
           <View style={styles.header}>
-            <Text style={styles.title}>Hospitals Nearby</Text>
+            <Text style={styles.title}>Nearby Places</Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={() => setPlaceType('hospital')}>
+                <Text style={styles.buttonText}>Hospitals</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={() => setPlaceType('pharmacy')}>
+                <Text style={styles.buttonText}>Pharmacies</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={() => setPlaceType('both')}>
+                <Text style={styles.buttonText}>Show Both</Text>
+              </TouchableOpacity>
+            </View>
           </View>
+
           <MapView
             style={styles.map}
             initialRegion={{
@@ -163,27 +233,34 @@ const FindHospitalScreen: React.FC = () => {
                 longitude: location.longitude,
               }}
               title="You are here"
-              pinColor="green"
+              pinColor="blue"
             />
 
-            {hospitals.map((hospital, index) => (
+            {places.map((place, index) => (
               <Marker
                 key={index}
                 coordinate={{
-                  latitude: hospital.geometry.location.lat,
-                  longitude: hospital.geometry.location.lng,
+                  latitude: place.geometry.location.lat,
+                  longitude: place.geometry.location.lng,
                 }}
-                title={hospital.name}
-                description={hospital.vicinity}
+                title={place.name}
+                description={place.vicinity}
               />
             ))}
           </MapView>
 
           <FlatList
-            data={hospitals}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={renderHospitalItem}
-            style={styles.hospitalList}
+  data={places}
+  keyExtractor={(item) => item.place_id}  // Use a unique key for each item
+  renderItem={renderPlaceItem}
+  style={styles.placeList}
+/>
+
+
+          <HospitalDetailsModal
+            selectedHospital={selectedPlace}  // Corrected prop name
+            modalVisible={modalVisible}       // Pass modal visibility state
+            setModalVisible={setModalVisible} // Pass setter for modal visibility
           />
         </>
       ) : (
@@ -204,31 +281,150 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#000000',
+  },
+  openorNot:{
+     marginTop:-100,
+    
+  },
+  twobutton:{
+    flexDirection: 'row',
+    
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly', // or 'space-between'
+    marginTop: 10,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5, // Optional: Adds horizontal margin
+    backgroundColor: '#3f6eef', // Example background color
+    borderRadius: 5, // Rounded corners
+    alignItems: 'center', // Center text horizontally
+    padding: 10, // Add some padding for better touch experience
+    // 3D effect using shadow properties
+    shadowColor: '#000', // Shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2, // Vertical shadow
+    },
+    shadowOpacity: 0.25, // Opacity of shadow
+    shadowRadius: 3.5, // Blurriness of shadow
+    elevation: 5, // Android shadow effect
+  },
+  buttonText: {
+    color: '#ffffff', // Text color
+    fontWeight: 'bold',
   },
   map: {
     width: '100%',
     height: '40%',
     borderRadius: 20,
     marginTop: 10,
+    borderWidth:1
   },
-  hospitalList: {
+  placeInfo: {
+    flex: 1, // Make this take the available space
+  },
+  placeList: {
     width: '100%',
     height: '60%',
     paddingHorizontal: 10,
   },
-  hospitalItem: {
+  placeItem: {
     backgroundColor: '#80deea',
     borderRadius: 10,
     marginVertical: 10,
     padding: 20,
+    flexDirection: 'row', // Make it row for placing open indicator
+    justifyContent: 'space-between', // Space between name and open indicator
+    alignItems: 'center', // Center align items vertically
   },
-  hospitalName: {
+  callicon:{
+    marginRight:15
+  },
+  callButton: {
+    marginTop: 5,
+    backgroundColor: '#359759', // Main background color
+    padding: 10,
+    borderRadius: 5,
+    flexDirection: 'row', // Align icon and text in a row
+    alignItems: 'center', // Center the icon and text vertically
+    justifyContent: 'center', // Center the content
+    width: 150,
+    // 3D effect using shadow properties
+    shadowColor: '#000', // Shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2, // Vertical shadow
+    },
+    shadowOpacity: 0.25, // Opacity of shadow
+    shadowRadius: 3.5, // Blurriness of shadow
+    elevation: 5, // Android shadow effect
+  },
+  
+  callButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize:20
+  },
+  placeName: {
     fontWeight: 'bold',
     fontSize: 16,
     marginBottom: 5,
+  },
+
+  locationButton: {
+    marginTop: 5,
+    backgroundColor: '#eb6e26',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    width:150,
+    flexDirection: 'row', // Align icon and text in a row
+    // Center the icon and text vertically
+    justifyContent: 'center', 
+    marginLeft:20,
+    // 3D effect using shadow properties
+    shadowColor: '#000', // Shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2, // Vertical shadow
+    },
+    shadowOpacity: 0.25, // Opacity of shadow
+    shadowRadius: 3.5, // Blurriness of shadow
+    elevation: 5, // Android shadow effect
+  },
+  locationButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize:20
+    
+  },
+  openText: {
+    fontSize: 20,
+    color: '#ffffff', 
+    backgroundColor:'green',// Color for open status
+    fontWeight: 'bold',
+    borderWidth:1,
+    paddingHorizontal:10,
+    paddingVertical:3,
+    borderRadius:20,
+    borderColor:'green'
+  },
+  closedText: {
+    fontSize: 20,
+    color: '#ffffff', 
+    backgroundColor:'red',
+    fontWeight: 'bold',
+    borderWidth:1,
+    paddingHorizontal:10,
+    paddingVertical:3,
+    borderRadius:20,
+    borderColor:'red'
   },
 });
 
