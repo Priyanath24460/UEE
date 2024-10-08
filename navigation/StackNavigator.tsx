@@ -27,7 +27,7 @@ const StackNavigator = () => {
        <Stack.Screen 
         name="FindHospitalScreen" 
         component={FindHospitalScreen} 
-        options={{ title: 'FindHospitalScreen' }} 
+        options={{ title: 'රෝහල්' }} 
       /> 
       
       <Stack.Screen 
