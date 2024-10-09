@@ -15,6 +15,10 @@ export type Hospital = {
   // Add other fields as necessary
 }
 
+import Pharmacy from '@/screens/donations/Pharmacy';
+import Upload from '@/screens/donations/UploadSlip';
+import DonationPool from '@/screens/donations/DonationPool';
+import PharmacySignUp from '@/screens/donations/PharmacySignUp';
 
 
 export type RootStackParamList = {
@@ -30,6 +34,10 @@ export type RootStackParamList = {
    //Ambulance
    FindAmbulanceScreen:undefined;
    MapScreen:undefined;
+   Pharmacy: undefined;
+   Upload: { id: string; name: string };
+   DonationPool: undefined;
+   PharmacySignUp: undefined;
   };
   const Stack = createStackNavigator<RootStackParamList>();
 
@@ -64,16 +72,41 @@ const StackNavigator = () => {
         component={FindHospitalScreen} 
         options={{ title: 'රෝහල්' }} 
       /> 
-       <Stack.Screen
-        name="ReviewPage"
-        component={ReviewPage}
-        options={{ title: 'Add Review' }} // Title for the review page
-      />
+       
       
       <Stack.Screen 
         name="Home" 
         component={Home} 
         options={{ title: 'Home' }} 
+      />
+      <Stack.Screen
+        name="ReviewPage"
+        component={ReviewPage}
+        options={{ title: 'Add Review' }} // Title for the review page
+      />
+
+      <Stack.Screen
+        name='Pharmacy'
+        component={Pharmacy}
+        options={{title: 'Pharmacy'}}
+      />
+
+      <Stack.Screen
+        name='Upload'
+        component={Upload}
+        options={{title: 'Upload'}}
+      />
+
+      <Stack.Screen
+        name='DonationPool'
+        component={DonationPool}
+        options={{title: 'DonationPool'}} 
+      />
+
+      <Stack.Screen
+      name='PharmacySignUp'
+      component={PharmacySignUp}
+      options={{title: 'PharmacySignUp'}}
       />
       
       <Stack.Screen 
