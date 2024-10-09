@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  ScrollView,
+  
 } from 'react-native';
 
-// Define the type for the hospital
+
 interface Hospital {
   place_id: string;
   name: string;
@@ -32,12 +34,14 @@ interface ModalProps {
   selectedHospital: Hospital | null;
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
+  
 }
 
 const HospitalDetailsModal: React.FC<ModalProps> = ({
   selectedHospital,
   modalVisible,
   setModalVisible,
+  
 }) => {
   const openInGoogleMaps = (lat: number, lng: number) => {
     const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
@@ -62,7 +66,7 @@ const HospitalDetailsModal: React.FC<ModalProps> = ({
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
           {selectedHospital ? (
-            <>
+            <ScrollView>
               <Text style={styles.modalTitle}>{selectedHospital.name}</Text>
               <Text style={styles.modalText}>Vicinity: {selectedHospital.vicinity}</Text>
               <Text style={styles.modalText}>Distance: {selectedHospital.roadDistance || 'N/A'}</Text>
@@ -70,9 +74,23 @@ const HospitalDetailsModal: React.FC<ModalProps> = ({
               <Text style={styles.modalText}>
                 Open Now: {selectedHospital.openingHours?.openNow ? 'Yes' : 'No'}
               </Text>
-              <Text style={styles.modalText}>
-                Hours: {selectedHospital.openingHours?.weekdayText?.join(', ') || 'N/A'}
-              </Text>
+              
+              {/* Table-like view for opening hours */}
+              {selectedHospital.openingHours?.weekdayText ? (
+                <View style={styles.hoursContainer}>
+                  <Text style={styles.hoursTitle}>Opening Hours:</Text>
+                  {selectedHospital.openingHours.weekdayText.map((day, index) => (
+                    <View key={index} style={styles.hoursRow}>
+                      <Text style={styles.dayText}>{day.split(': ')[0]}:</Text>
+                      <Text style={styles.hoursText}>{day.split(': ')[1]}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.modalText}>Hours: N/A</Text>
+              )}
+
+             
 
               <TouchableOpacity
                 style={styles.modalButton}
@@ -92,7 +110,7 @@ const HospitalDetailsModal: React.FC<ModalProps> = ({
               >
                 <Text style={styles.modalButtonText}>Close</Text>
               </TouchableOpacity>
-            </>
+            </ScrollView>
           ) : (
             <Text style={styles.modalText}>No hospital selected.</Text>
           )}
@@ -114,6 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     width: '80%',
+    maxHeight: '80%', // Limit the height of the modal to prevent overflow
     alignItems: 'center',
   },
   modalTitle: {
@@ -145,6 +164,42 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
+  },
+  hoursContainer: {
+    width: '100%',
+    marginTop: 10,
+  },
+  hoursTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  hoursRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  dayText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  hoursText: {
+    fontSize: 16,
+    color: '#555',
+  },
+
+  reviewItem: {
+    marginVertical: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+  },
+  reviewAuthor: {
     fontWeight: 'bold',
   },
 });
