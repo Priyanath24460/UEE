@@ -4,10 +4,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Home from '../screens/Home';
 import FindHospitalScreen from '@/screens/hospitals/FindHospitalScreen';
 import ReviewPage from '@/screens/hospitals/ReviewPage';
-import Login from '@/screens/Login';
 import Register from '@/screens/Register';
-
-
+import Login from '@/screens/Login';
+import FindAmbulanceScreen from '@/screens/Ambulance/FindAmbulanceScreen';
+import MapScreen from '@/screens/Ambulance/MapScreen';
 
 export type Hospital = {
   name: string;
@@ -16,12 +16,20 @@ export type Hospital = {
 }
 
 
+
 export type RootStackParamList = {
+
+   Login:undefined;
+   Register:undefined;
    Home:undefined;
    FindHospitalScreen:undefined;
    ReviewPage: { hospital: Hospital }; // Add this line
-   Login:undefined;
-   Register:undefined
+
+
+
+   //Ambulance
+   FindAmbulanceScreen:undefined;
+   MapScreen:undefined;
   };
   const Stack = createStackNavigator<RootStackParamList>();
 
@@ -56,18 +64,28 @@ const StackNavigator = () => {
         component={FindHospitalScreen} 
         options={{ title: 'රෝහල්' }} 
       /> 
+       <Stack.Screen
+        name="ReviewPage"
+        component={ReviewPage}
+        options={{ title: 'Add Review' }} // Title for the review page
+      />
       
       <Stack.Screen 
         name="Home" 
         component={Home} 
         options={{ title: 'Home' }} 
       />
-      <Stack.Screen
-        name="ReviewPage"
-        component={ReviewPage}
-        options={{ title: 'Add Review' }} // Title for the review page
-      />
       
+      <Stack.Screen 
+        name="FindAmbulanceScreen" 
+        component={FindAmbulanceScreen} 
+        options={{ title: 'FindAmbulanceScreen' }} 
+      />
+       <Stack.Screen 
+        name="MapScreen" 
+        component={MapScreen} 
+        options={{ title: 'MapScreen' }} 
+      />
 
     </Stack.Navigator>
     
