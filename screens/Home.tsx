@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/StackNavigator';
 
+
 type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'Home'>;
 
 const Home = () => {
@@ -24,6 +25,8 @@ const Home = () => {
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>💰 Donation</Text>
       </TouchableOpacity>
+
+      
     </View>
   );
 };
