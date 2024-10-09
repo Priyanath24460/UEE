@@ -8,9 +8,11 @@ import {
   Linking,
   Alert,
   ScrollView,
-  
 } from 'react-native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/StackNavigator';
 
+type ReviewPageNavigationProp = NavigationProp<RootStackParamList, 'ReviewPage'>;
 
 interface Hospital {
   place_id: string;
@@ -34,15 +36,16 @@ interface ModalProps {
   selectedHospital: Hospital | null;
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
-  
 }
 
 const HospitalDetailsModal: React.FC<ModalProps> = ({
   selectedHospital,
   modalVisible,
   setModalVisible,
-  
 }) => {
+  
+  const navigation = useNavigation<ReviewPageNavigationProp>();
+
   const openInGoogleMaps = (lat: number, lng: number) => {
     const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
     Linking.canOpenURL(url)
@@ -53,7 +56,7 @@ const HospitalDetailsModal: React.FC<ModalProps> = ({
           return Linking.openURL(url);
         }
       })
-      .catch((err) => Alert.alert('Error', 'Failed to open Google Maps.'));
+      .catch(() => Alert.alert('Error', 'Failed to open Google Maps.'));
   };
 
   return (
@@ -68,17 +71,16 @@ const HospitalDetailsModal: React.FC<ModalProps> = ({
           {selectedHospital ? (
             <ScrollView>
               <Text style={styles.modalTitle}>{selectedHospital.name}</Text>
-              <Text style={styles.modalText}>Vicinity: {selectedHospital.vicinity}</Text>
-              <Text style={styles.modalText}>Distance: {selectedHospital.roadDistance || 'N/A'}</Text>
-              <Text style={styles.modalText}>Contact: {selectedHospital.phoneNumber || 'N/A'}</Text>
+              <Text style={styles.modalText}>ස්ථානය: {selectedHospital.vicinity}</Text>
+              <Text style={styles.modalText}>දුර: {selectedHospital.roadDistance || 'N/A'}</Text>
+              <Text style={styles.modalText}>දුරකත අංකය: {selectedHospital.phoneNumber || 'N/A'}</Text>
               <Text style={styles.modalText}>
-                Open Now: {selectedHospital.openingHours?.openNow ? 'Yes' : 'No'}
+              විවෘතයි : {selectedHospital.openingHours?.openNow ? 'ඔව්' : 'නැත'}
               </Text>
-              
-              {/* Table-like view for opening hours */}
+
               {selectedHospital.openingHours?.weekdayText ? (
                 <View style={styles.hoursContainer}>
-                  <Text style={styles.hoursTitle}>Opening Hours:</Text>
+                  <Text style={styles.hoursTitle}>විවෘතව ඇති වේලාවන්:</Text>
                   {selectedHospital.openingHours.weekdayText.map((day, index) => (
                     <View key={index} style={styles.hoursRow}>
                       <Text style={styles.dayText}>{day.split(': ')[0]}:</Text>
@@ -90,8 +92,6 @@ const HospitalDetailsModal: React.FC<ModalProps> = ({
                 <Text style={styles.modalText}>Hours: N/A</Text>
               )}
 
-             
-
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={() =>
@@ -101,18 +101,25 @@ const HospitalDetailsModal: React.FC<ModalProps> = ({
                   )
                 }
               >
-                <Text style={styles.modalButtonText}>Open in Google Maps</Text>
+                <Text style={styles.modalButtonText}>Google සිතියම</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalreviewButton}
+                onPress={() => navigation.navigate('ReviewPage', { hospital: selectedHospital })}
+              >
+                <Text style={styles.modalButtonText}>සටහන්</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.modalCloseButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.modalButtonText}>Close</Text>
+                <Text style={styles.modalButtonText}>පෙර පිටුවට</Text>
               </TouchableOpacity>
             </ScrollView>
           ) : (
-            <Text style={styles.modalText}>No hospital selected.</Text>
+            <Text style={styles.modalText}>රෝහලක් තෝරා නැත.</Text>
           )}
         </View>
       </View>
@@ -132,7 +139,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     width: '80%',
-    maxHeight: '80%', // Limit the height of the modal to prevent overflow
+    maxHeight: '80%',
     alignItems: 'center',
   },
   modalTitle: {
@@ -145,6 +152,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     textAlign: 'center',
+  },
+  modalreviewButton:{
+    backgroundColor: '#22b241',
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 15,
+    width: '100%',
+    alignItems: 'center',
   },
   modalButton: {
     backgroundColor: '#4dd0e1',
@@ -190,17 +205,6 @@ const styles = StyleSheet.create({
   hoursText: {
     fontSize: 16,
     color: '#555',
-  },
-
-  reviewItem: {
-    marginVertical: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-  },
-  reviewAuthor: {
-    fontWeight: 'bold',
   },
 });
 

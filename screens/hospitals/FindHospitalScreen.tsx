@@ -70,6 +70,8 @@ const FindHospitalScreen: React.FC = () => {
     })();
   }, [placeType]); // Fetch data when placeType changes
 
+  
+
   const getUserLocation = async (): Promise<Coordinates | null> => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
@@ -305,7 +307,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5, // Optional: Adds horizontal margin
-    backgroundColor: '#3f6eef', // Example background color
+    backgroundColor: '#108292', // Example background color
     borderRadius: 5, // Rounded corners
     alignItems: 'center', // Center text horizontally
     padding: 10, // Add some padding for better touch experience
