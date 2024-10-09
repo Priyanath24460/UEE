@@ -10,7 +10,7 @@ const Home = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate('MapScreen')}>
         <Text style={styles.buttonText}>🚑 Ambulance</Text>
       </TouchableOpacity>
 
