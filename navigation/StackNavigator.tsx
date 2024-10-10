@@ -8,6 +8,12 @@ import Register from '@/screens/Register';
 import Login from '@/screens/Login';
 import FindAmbulanceScreen from '@/screens/Ambulance/FindAmbulanceScreen';
 import MapScreen from '@/screens/Ambulance/MapScreen';
+import Medicine from '@/screens/firstAid/Medicine';
+import Burn from '@/screens/firstAid/Burn';
+import AddEmergencySituationForm from '@/screens/firstAid/AddEmergencySituationForm';
+import { NavigationContainer } from '@react-navigation/native';
+import { ParamListBase } from '@react-navigation/native';
+
 
 export type Hospital = {
   name: string;
@@ -38,6 +44,9 @@ export type RootStackParamList = {
    Upload: { id: string; name: string };
    DonationPool: undefined;
    PharmacySignUp: undefined;
+   Medicine:undefined;
+   Burn:{ situationId: string };
+   AddEmergencySituationForm: undefined;
   };
   const Stack = createStackNavigator<RootStackParamList>();
 
@@ -119,6 +128,26 @@ const StackNavigator = () => {
         component={MapScreen} 
         options={{ title: 'MapScreen' }} 
       />
+
+      
+      <Stack.Screen 
+        name="Medicine" 
+        component={Medicine} 
+        options={{ title: 'Medicine' }} 
+      />
+      <Stack.Screen 
+        name="Burn" 
+        component={Burn} 
+        options={{ title: 'Burn' }} 
+      />
+      
+      <Stack.Screen 
+        name="AddEmergencySituationForm" 
+        component={AddEmergencySituationForm} 
+        options={{ title: 'AddEmergencySituationForm' }} 
+      />
+      
+      
 
     </Stack.Navigator>
     
