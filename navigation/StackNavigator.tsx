@@ -56,7 +56,7 @@ export type RootStackParamList = {
 
    //donations
    Pharmacy: { pharmacyData: PharmacyData };
-   Upload: { id: string; name: string };
+   Upload: { id: string; name: string; amount:number };
    DonationPool: undefined;
    PharmacySignUp: undefined;
    Medicine:undefined;
