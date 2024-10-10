@@ -20,6 +20,19 @@ export type Hospital = {
   location?: string;
   // Add other fields as necessary
 }
+// Define the PharmacyData type
+export type PharmacyData = {
+  id: string; // Define the properties as needed
+  name: string;
+  phone: string;
+  address: string;
+  bankDetails: {
+    bank: string;
+    branch: string;
+    accountNumber: string;
+    accountHolderName: string;
+  };
+};
 
 import Pharmacy from '@/screens/donations/Pharmacy';
 import Upload from '@/screens/donations/UploadSlip';
@@ -40,11 +53,14 @@ export type RootStackParamList = {
    //Ambulance
    FindAmbulanceScreen:undefined;
    MapScreen:undefined;
-   Pharmacy: undefined;
+
+   //donations
+   Pharmacy: { pharmacyData: PharmacyData };
    Upload: { id: string; name: string };
    DonationPool: undefined;
    PharmacySignUp: undefined;
    Medicine:undefined;
+
    Burn:{ situationId: string };
    AddEmergencySituationForm: undefined;
   };
@@ -94,29 +110,27 @@ const StackNavigator = () => {
         options={{ title: 'Add Review' }} // Title for the review page
       />
 
+     <Stack.Screen
+       name='Pharmacy'
+       component={Pharmacy}
+        options={{ title: 'Pharmacy' }}
+       />
       <Stack.Screen
-        name='Pharmacy'
-        component={Pharmacy}
-        options={{title: 'Pharmacy'}}
-      />
-
-      <Stack.Screen
-        name='Upload'
+       name='Upload'
         component={Upload}
-        options={{title: 'Upload'}}
-      />
-
+        options={{ title: 'Upload' }}
+       />
       <Stack.Screen
         name='DonationPool'
         component={DonationPool}
-        options={{title: 'DonationPool'}} 
+        options={{ title: 'DonationPool' }} 
+      />
+      <Stack.Screen
+        name='PharmacySignUp'
+        component={PharmacySignUp}
+        options={{ title: 'PharmacySignUp' }}
       />
 
-      <Stack.Screen
-      name='PharmacySignUp'
-      component={PharmacySignUp}
-      options={{title: 'PharmacySignUp'}}
-      />
       
       <Stack.Screen 
         name="FindAmbulanceScreen" 

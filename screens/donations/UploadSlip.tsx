@@ -5,9 +5,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, NavigationProp, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/StackNavigator';
 import { db } from '../../config/FirebaseConfig';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { TextInput } from "react-native-gesture-handler";
+import { getAuth } from "firebase/auth";
 
 type UploadNavigationProp = NavigationProp<RootStackParamList, 'Upload'>;
 
@@ -17,13 +18,37 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
     const navigation = useNavigation<UploadNavigationProp>();
     
     // Extract pharmacy ID and name from route params
-    const { id: pharmacyId, name: pharmacyName } = route.params;
+    const { id: pharmacyId, name: pharmacyName, amount: donationAmount } = route.params;
+
+    //bank details
+    const [bankDetails, setBankDetails] = useState<{ accountNumber: string, bankName: string, branch: string } | null>(null);
 
     // Inputs
     const [name, setName] = useState('');
     const [phoneno, setPhoneno] = useState('');
+    const [donation, setDonation] = useState('');
     const [image, setImage] = useState<string | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
+    
+    //fetch
+    React.useEffect(() => {
+        const fetchBankDetails = async () => {
+            try{
+                const docRef = doc(db, 'pharmacies', pharmacyId);
+                const docSnap = await getDoc(docRef);
+
+                if(docSnap.exists()){
+                    const data = docSnap.data();
+                    setBankDetails(data.bankDetails);
+                }else{
+                    console.log("No such document!");
+                }
+            }catch(error){
+                console.error("Error fetching bank details:", error);
+            }
+        };
+        fetchBankDetails();
+    }, [pharmacyId]);
 
     // Image selection from gallery
     const pickImage = async () => {
@@ -62,29 +87,81 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
 
     const handleSubmit = async () => {
         try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+    
+            if (!user) {
+                Alert.alert("You need to be logged in to upload a slip");
+                return;
+            }
+    
+            const userId = user.uid;
             let uploadedImageUrl = null;
+    
             if (image) {
                 uploadedImageUrl = await uploadImage(image);
             }
-
-            // Adding document to Firebase collection with pharmacy ID reference
-            await addDoc(collection(db, 'Donations'), {
+    
+            // Save donation data to temporary collection until approved
+            const pendingDonationRef = collection(db, 'PendingDonations');
+            const docRef = await addDoc(pendingDonationRef, {
                 name: name,
                 phoneno: phoneno,
+                donation: donation,
                 imageUrl: uploadedImageUrl,
-                pharmacyId: pharmacyId,  // Reference to the pharmacy ID
+                pharmacyId: pharmacyId,
+                userId: userId,
                 timestamp: new Date(),
             });
-
-            Alert.alert("Data and image uploaded successfully!");
+    
+            // Fetch the pharmacy's push token from Firestore
+            const pharmacyDocRef = doc(db, 'pharmacies', pharmacyId);
+            const pharmacyDocSnap = await getDoc(pharmacyDocRef);
+    
+            if (pharmacyDocSnap.exists()) {
+                const pharmacyData = pharmacyDocSnap.data();
+                const pharmacyPushToken = pharmacyData?.pushToken;
+    
+                if (pharmacyPushToken) {
+                    // Send notification to the pharmacy to approve the donation
+                    await sendPushNotification(pharmacyPushToken, name, donation);
+                }
+            } else {
+                console.log("No such pharmacy document!");
+            }
+    
+            Alert.alert("Donation submitted for approval!");
             setName('');
             setPhoneno('');
+            setDonation('');
             setImage(null);
+    
         } catch (error) {
             console.error("Error uploading data: ", error);
             Alert.alert('Error uploading data or image.');
         }
     };
+    
+    // Modify the sendPushNotification function as needed
+    const sendPushNotification = async (expoPushToken: string, donorName: string, donationAmount: string) => {
+        const message = {
+            to: expoPushToken,
+            sound: 'default',
+            title: 'New Donation Pending Approval',
+            body: `${donorName} has submitted a donation of ${donationAmount}. Please review it.`,
+            data: { donationAmount, donorName },
+        };
+    
+        await fetch('https://exp.host/--/api/v2/push/send', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        });
+    };
+    
 
     return (
         <View style={styles.container}>
@@ -93,23 +170,34 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
             
             {/* Amount Section */}
             <View style={styles.amountContainer}>
-                <Text style={styles.amountText}>රු.5000.00</Text>
+                <Text style={styles.amountText}>රු.{donationAmount.toFixed(2)}</Text>
             </View>
             
             {/* Input Form Section */}
             <View style={styles.formContainer}>
+                <Text>Name</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Input Text"
+                    placeholder="Input Name"
                     value={name}
                     onChangeText={setName}
                 />
+                <Text>Phone Number</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Input Phone Number"
                     value={phoneno}
                     onChangeText={setPhoneno}
                 />
+
+                <Text>Donation Amount</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Input Donation amount"
+                    value={donation}
+                    onChangeText={setDonation}
+                />
+
 
                 {/* Image Preview */}
                 {image && <Image source={{ uri: image }} style={styles.image} />}
