@@ -12,6 +12,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import HospitalDetailsModal from '../../components/HospitalDetailsModal'; // Import the modal
 import { MaterialIcons } from '@expo/vector-icons';
+import Footer from '@/layouts/Footer';
 
 
 
@@ -44,6 +45,7 @@ const FindHospitalScreen: React.FC = () => {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [placeType, setPlaceType] = useState<'hospital' | 'pharmacy' | 'both'>('both'); // Add state to track type selection
+  const [title, setTitle] = useState('සියල්ල'); // Add title state
 
   useEffect(() => {
     (async () => {
@@ -67,6 +69,8 @@ const FindHospitalScreen: React.FC = () => {
       }
     })();
   }, [placeType]); // Fetch data when placeType changes
+
+  
 
   const getUserLocation = async (): Promise<Coordinates | null> => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -120,6 +124,7 @@ const FindHospitalScreen: React.FC = () => {
           openNow: data.result.opening_hours.open_now,
           weekdayText: data.result.opening_hours.weekday_text,
         } : undefined,
+        
       };
     } catch (error) {
       console.error(error);
@@ -175,26 +180,23 @@ const FindHospitalScreen: React.FC = () => {
       <View style={styles.placeInfo}>
         <Text style={styles.placeName}>{item.name}</Text>
         <Text>{item.vicinity}</Text>
-        <Text>Distance: {item.roadDistance}</Text>
-        <Text>Contact: {item.phoneNumber}</Text>
+        <Text>දුර: {item.roadDistance}</Text>
+        <Text>දුරකථන අංකය: {item.phoneNumber}</Text>
         <View style={styles.twobutton}>
-        <TouchableOpacity onPress={() => handleCall(item.phoneNumber)} style={styles.callButton}>
-        <MaterialIcons name="phone" size={24} color="#ffffff" style={styles.callicon}  />
-
-          <Text style={styles.callButtonText}>Call</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleGetLocation(item)} style={styles.locationButton}>
-        <MaterialIcons name="place" size={24} color="#ffffff" style={styles.callicon} />
-
-          <Text style={styles.locationButtonText}>Location</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleCall(item.phoneNumber)} style={styles.callButton}>
+            <MaterialIcons name="phone" size={24} color="#ffffff" style={styles.callicon} />
+            <Text style={styles.callButtonText}>ඇමතුම</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleGetLocation(item)} style={styles.locationButton}>
+            <MaterialIcons name="place" size={24} color="#ffffff" style={styles.callicon} />
+            <Text style={styles.locationButtonText}>ස්ථානය</Text>
+          </TouchableOpacity>
         </View>
-        {/*<Text>Hours: {item.openingHours?.weekdayText?.join(', ') || 'N/A'}</Text>*/}
       </View>
       <View style={styles.openorNot}>
-      <Text style={item.openingHours?.openNow ? styles.openText : styles.closedText } >
-        {item.openingHours?.openNow ? 'Open' : 'Closed'}
-      </Text>
+        <Text style={item.openingHours?.openNow ? styles.openText : styles.closedText}>
+          {item.openingHours?.openNow ? 'විවෘතයි' : 'වසා ඇත'}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -204,16 +206,16 @@ const FindHospitalScreen: React.FC = () => {
       {location ? (
         <>
           <View style={styles.header}>
-            <Text style={styles.title}>Nearby Places</Text>
+          <Text style={styles.title}>{title}</Text>
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={() => setPlaceType('hospital')}>
-                <Text style={styles.buttonText}>Hospitals</Text>
+              <TouchableOpacity style={styles.button} onPress={() => {setPlaceType('hospital');setTitle('රෝහල්')}}>
+                <Text style={styles.buttonText}>රෝහල්</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button} onPress={() => setPlaceType('pharmacy')}>
-                <Text style={styles.buttonText}>Pharmacies</Text>
+              <TouchableOpacity style={styles.button} onPress={() => {setPlaceType('pharmacy');setTitle('ෆාමසි')}}>
+                <Text style={styles.buttonText}>ෆාමසි</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button} onPress={() => setPlaceType('both')}>
-                <Text style={styles.buttonText}>Show Both</Text>
+              <TouchableOpacity style={styles.button} onPress={() => {setPlaceType('both');setTitle('සියල්ල')}}>
+                <Text style={styles.buttonText}>සියල්ල</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -266,6 +268,10 @@ const FindHospitalScreen: React.FC = () => {
       ) : (
         <Text>Loading...</Text>
       )}
+
+<View style={styles.footerContainer}>
+        <Footer />
+      </View>
     </View>
   );
 };
@@ -283,10 +289,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#ffffff',
   },
   openorNot:{
-     marginTop:-100,
+     marginTop:-110,
     
   },
   twobutton:{
@@ -301,7 +307,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5, // Optional: Adds horizontal margin
-    backgroundColor: '#3f6eef', // Example background color
+    backgroundColor: '#108292', // Example background color
     borderRadius: 5, // Rounded corners
     alignItems: 'center', // Center text horizontally
     padding: 10, // Add some padding for better touch experience
@@ -333,6 +339,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '60%',
     paddingHorizontal: 10,
+    borderWidth:3,
+    borderTopWidth:10,
+
+    borderColor:'#108292',
+    borderTopLeftRadius:20,
+    borderTopRightRadius:20,
   },
   placeItem: {
     backgroundColor: '#80deea',
@@ -342,6 +354,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // Make it row for placing open indicator
     justifyContent: 'space-between', // Space between name and open indicator
     alignItems: 'center', // Center align items vertically
+     // 3D effect using shadow properties
+     shadowColor: '#000', // Shadow color
+     shadowOffset: {
+       width: 0,
+       height: 2, // Vertical shadow
+     },
+     shadowOpacity: 0.25, // Opacity of shadow
+     shadowRadius: 3.5, // Blurriness of shadow
+     elevation: 5, // Android shadow effect
   },
   callicon:{
     marginRight:15
@@ -405,18 +426,21 @@ const styles = StyleSheet.create({
     
   },
   openText: {
-    fontSize: 20,
+    fontSize: 16,
     color: '#ffffff', 
     backgroundColor:'green',// Color for open status
     fontWeight: 'bold',
     borderWidth:1,
-    paddingHorizontal:10,
-    paddingVertical:3,
+    
+    paddingLeft:13,
+    paddingRight:10,
+    paddingTop: 6,
+    paddingBottom:3,
     borderRadius:20,
     borderColor:'green'
   },
   closedText: {
-    fontSize: 20,
+    fontSize: 16,
     color: '#ffffff', 
     backgroundColor:'red',
     fontWeight: 'bold',
@@ -425,6 +449,12 @@ const styles = StyleSheet.create({
     paddingVertical:3,
     borderRadius:20,
     borderColor:'red'
+  },
+  footerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '91%',
+    backgroundColor:'#108292',
   },
 });
 

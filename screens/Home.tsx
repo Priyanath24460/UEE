@@ -3,13 +3,14 @@ import React from 'react';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/StackNavigator';
 
+
 type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'Home'>;
 
 const Home = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate('MapScreen')}>
         <Text style={styles.buttonText}>🚑 Ambulance</Text>
       </TouchableOpacity>
 
@@ -21,9 +22,11 @@ const Home = () => {
         <Text style={styles.buttonText}>🩹 First Aid</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('DonationPool')}>
         <Text style={styles.buttonText}>💰 Donation</Text>
       </TouchableOpacity>
+
+      
     </View>
   );
 };

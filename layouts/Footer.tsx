@@ -1,9 +1,11 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/StackNavigator'; // Ensure correct path
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 // Define navigation prop type
 type NavigationProp = StackNavigationProp<RootStackParamList>;
@@ -14,27 +16,31 @@ const Footer: React.FC = () => {
   return (
     <View style={styles.footerContainer}>
       <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
-        <Ionicons name="home-outline" size={24} color="#1b2785" />
-        <Text style={{ color: '#1b2785' }}>Home</Text>
+      <FontAwesome5 name="ambulance" size={24} color="#ffffff" />
+        <Text style={{ color: '#ffffff' }}>ගිලන්රථ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate('FindHospitalScreen')} style={styles.iconButton}>
+      <FontAwesome5 name="hospital" size={24} color="#ffffff" />
+        <Text style={{ color: '#ffffff' }}>රෝහල්</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
-      <Ionicons name="search" size={24} color="#1b2785" />
-
-        <Text style={{ color: '#1b2785' }}>Help</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
-      <Ionicons name="qr-code" size={24} color="#1b2785" />
-
-        <Text style={{ color: '#1b2785' }}>QR Code</Text>
+      
+      <FontAwesome5 name="first-aid" size={24} color="#ffffff" />
+        <Text style={{ color: '#ffffff' }}>ප්‍රථමාධාර</Text>
       </TouchableOpacity>
 
       
 
       <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
-        <Ionicons name="person-circle-outline" size={24} color="#1b2785" />
-        <Text style={{ color: '#1b2785' }}>Profile</Text>
+      <FontAwesome5 name="donate" size={24} color="#ffffff" />
+        <Text style={{ color: '#ffffff' }}>පරිත්‍යාගය</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
+      <FontAwesome5 name="user-alt" size={24} color="#ffffff" />
+        <Text style={{ color: '#ffffff' }}>ගිණුම</Text>
       </TouchableOpacity>
     </View>
   );
@@ -53,7 +59,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#D1D5DB', // Equivalent to bg-gray-300
+    backgroundColor:'#108292', // Equivalent to bg-gray-300
   },
   iconButton: {
     alignItems: 'center',
