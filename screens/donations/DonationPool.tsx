@@ -6,30 +6,64 @@ import { RootStackParamList } from '../../navigation/StackNavigator';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../config/FirebaseConfig'; // Ensure this path is correct
 
+// Update the Pharmacy type to make address optional
+type Pharmacy = {
+    id: string;
+    name: string;
+    address?: string; // Make address optional
+    amount: number; 
+};
+
 type DonationPoolNavigationProp = NavigationProp<RootStackParamList, 'DonationPool'>;
 
 const DonationPool = () => {
-    const navigation = useNavigation<DonationPoolNavigationProp>(); // Define navigation prop
-    const [pharmacies, setPharmacies] = useState<{ id: string; name: string; address: string }[]>([]); // Specify pharmacy type
+    const navigation = useNavigation<DonationPoolNavigationProp>(); 
+    const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]); 
 
     // Fetch pharmacy data from Firestore
     const fetchPharmacies = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, 'Pharmacy'));
-            const pharmaciesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as { id: string; name: string; address: string }[];
+            // Fetch all pharmacies from the pharmacyPool collection
+            const querySnapshot = await getDocs(collection(db, 'pharmacyPool')); 
+    
+            // Initialize an array to hold the pharmacies with their total donations
+            const pharmaciesData = await Promise.all(querySnapshot.docs.map(async doc => {
+                const data = doc.data() as { name: string; address?: string }; 
+                const pharmacyId = doc.id;
+    
+                // Fetch donations associated with this pharmacy
+                const donationsSnapshot = await getDocs(collection(db, 'Donations'));
+                let totalAmount = 0;
+    
+                // Calculate total donations for the pharmacy
+                donationsSnapshot.docs.forEach(donationDoc => {
+                    const donationData = donationDoc.data() as { pharmacyId: string; donation: number };
+    
+                    // Check if the pharmacyId matches and add to totalAmount
+                    if (donationData.pharmacyId === pharmacyId) {
+                        totalAmount += donationData.donation; // Add the donation amount
+                    }
+                });
+    
+                // Return pharmacy data along with the total donation amount
+                return { id: pharmacyId, name: data.name, address: data.address, amount: totalAmount }; 
+            }));
+    
+            // Update state with fetched pharmacies data
             setPharmacies(pharmaciesData);
         } catch (error) {
             console.error("Error fetching pharmacies: ", error);
         }
     };
+    
 
     useEffect(() => {
         fetchPharmacies();
     }, []);
 
     // Navigate to the pharmacy detail page
-    const handlePharmacyPress = (pharmacyId: string, pharmacyName: string) => {
-        navigation.navigate('Upload', { id: pharmacyId, name: pharmacyName });
+    const handlePharmacyPress = (pharmacyId: string, pharmacyName: string, amount: number) => {
+        navigation.navigate('Upload', { id: pharmacyId, name: pharmacyName, amount }); 
     };
 
     return (
@@ -39,17 +73,15 @@ const DonationPool = () => {
                 data={pharmacies}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => handlePharmacyPress(item.id, item.name)}>
+                    <TouchableOpacity onPress={() => handlePharmacyPress(item.id, item.name, item.amount)}>
                         <View style={styles.pharmacyItem}>
                             <Text style={styles.pharmacyName}>{item.name}</Text>
-                            <Text style={styles.pharmacyAddress}>{item.address}</Text>
+                            <Text style={styles.pharmacyAddress}>{item.address || 'Address not available'}</Text>
+                            <Text style={styles.amountText}>Total Amount: ${item.amount}</Text> 
                         </View>
                     </TouchableOpacity>
                 )}
             />
-             <TouchableOpacity onPress={()=>navigation.navigate('Pharmacy')}>
-        <Text >pharmacy register</Text>
-      </TouchableOpacity>
         </View>
     );
 };
@@ -76,6 +108,11 @@ const styles = StyleSheet.create({
     pharmacyAddress: {
         fontSize: 14,
         color: '#555',
+    },
+    amountText: {
+        fontSize: 16,
+        color: '#000',
+        marginTop: 5,
     },
 });
 
