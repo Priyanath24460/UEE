@@ -25,8 +25,7 @@ const Footer: React.FC = () => {
         <Text style={{ color: '#ffffff' }}>රෝහල්</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
-      
+      <TouchableOpacity onPress={() => navigation.navigate('Medicine')} style={styles.iconButton}>
       <FontAwesome5 name="first-aid" size={24} color="#ffffff" />
         <Text style={{ color: '#ffffff' }}>ප්‍රථමාධාර</Text>
       </TouchableOpacity>

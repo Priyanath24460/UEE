@@ -18,7 +18,7 @@ const Home = () => {
         <Text style={styles.buttonText}>🏥 Hospitals</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={()=>navigation.navigate('Medicine')}>
         <Text style={styles.buttonText}>🩹 First Aid</Text>
       </TouchableOpacity>
 
