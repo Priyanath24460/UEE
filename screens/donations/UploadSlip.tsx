@@ -170,7 +170,7 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
             
             {/* Amount Section */}
             <View style={styles.amountContainer}>
-                <Text style={styles.amountText}>රු.{donationAmount.toFixed(2)}</Text>
+                <Text style={styles.amountText}>රු.{donationAmount}</Text>
             </View>
             
             {/* Input Form Section */}
