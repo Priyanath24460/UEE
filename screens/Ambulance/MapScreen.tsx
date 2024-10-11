@@ -89,7 +89,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Include Footer at the bottom */}
+      <View style={styles.footerContainer}>
       <Footer />
+      </View>
+
+     
     </View>
   );
 };
@@ -139,6 +143,14 @@ const styles = StyleSheet.create({
     fontSize: 35,
     textAlign: 'center',
   },
+  footerContainer:{
+    position:'absolute',
+    bottom:0,
+    width:'91%',
+    left:-1
+    
+  
+  }
 });
 
 export default MapScreen;

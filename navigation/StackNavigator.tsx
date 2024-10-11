@@ -23,7 +23,7 @@ export type Hospital = {
 }
 // Define the PharmacyData type
 export type PharmacyData = {
-  id: string; // Define the properties as needed
+  id: string; 
   name: string;
   phone: string;
   address: string;
@@ -39,7 +39,7 @@ import Pharmacy from '@/screens/donations/Pharmacy';
 import Upload from '@/screens/donations/UploadSlip';
 import DonationPool from '@/screens/donations/DonationPool';
 import PharmacySignUp from '@/screens/donations/PharmacySignUp';
-
+import StatusScreen from '@/screens/donations/StatusScreen';
 
 export type RootStackParamList = {
 
@@ -62,6 +62,8 @@ export type RootStackParamList = {
    DonationPool: undefined;
    PharmacySignUp: undefined;
    Medicine:undefined;
+   StatusScreen: { donationId?: string | null, status?: string | null };
+
 
    Burn:{ situationId: string };
    AddEmergencySituationForm: undefined;
@@ -128,12 +130,12 @@ const StackNavigator = () => {
       <Stack.Screen
        name='Upload'
         component={Upload}
-        options={{ title: 'Upload' }}
+        options={{ title: 'යොමු කිරීම්' }}
        />
       <Stack.Screen
         name='DonationPool'
         component={DonationPool}
-        options={{ title: 'DonationPool' }} 
+        options={{ title: 'මූල්‍ය ප්‍රදාන' }} 
       />
       <Stack.Screen
         name='PharmacySignUp'
@@ -141,11 +143,17 @@ const StackNavigator = () => {
         options={{ title: 'PharmacySignUp' }}
       />
 
+      <Stack.Screen
+      name='StatusScreen'
+      component={StatusScreen}
+      options={{ title: 'පරිත්‍යාග' }} 
+      />
+
       
       <Stack.Screen 
         name="FindAmbulanceScreen" 
         component={FindAmbulanceScreen} 
-        options={{ title: 'FindAmbulanceScreen' }} 
+        options={{ title: 'ගිලන්රථ පිටුව' }} 
       />
        <Stack.Screen 
         name="MapScreen" 
