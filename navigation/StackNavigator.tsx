@@ -14,6 +14,7 @@ import AddEmergencySituationForm from '@/screens/firstAid/AddEmergencySituationF
 import { NavigationContainer } from '@react-navigation/native';
 import { ParamListBase } from '@react-navigation/native';
 
+import LogoDisplay from '@/screens/LogoDisplay';
 
 export type Hospital = {
   name: string;
@@ -42,6 +43,7 @@ import PharmacySignUp from '@/screens/donations/PharmacySignUp';
 
 export type RootStackParamList = {
 
+  LogoDisplay:undefined
    Login:undefined;
    Register:undefined;
    Home:undefined;
@@ -63,6 +65,7 @@ export type RootStackParamList = {
 
    Burn:{ situationId: string };
    AddEmergencySituationForm: undefined;
+
   };
   const Stack = createStackNavigator<RootStackParamList>();
 
@@ -70,24 +73,31 @@ export type RootStackParamList = {
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Login"
+    <Stack.Navigator initialRouteName="LogoDisplay"
     
     screenOptions={{
     
       headerStyle: styles.header,  // Apply header styles
       headerTintColor: '#fff',     // Text color
-      headerTitleStyle: styles.headerTitle,  // Title styles
+      headerTitleStyle: styles.headerTitle,  // Title styles       
     }}
     >
         <Stack.Screen 
+        name="LogoDisplay" 
+        component={LogoDisplay} 
+        options={{ title: '' }} 
+      />
+
+
+        <Stack.Screen 
         name="Login" 
         component={Login} 
-        options={{ title: 'Login' }} 
+        options={{ title: '' }} 
       />
       <Stack.Screen 
         name="Register" 
         component={Register} 
-        options={{ title: 'Register' }} 
+        options={{ title: '' }} 
       />
 
 

@@ -55,20 +55,23 @@ const MapScreen: React.FC<MapScreenProps> = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>ගිලන්රථ සොයන්න</Text>
 
-      <MapView
-        style={styles.map}
-        initialRegion={region}
-        showsUserLocation={true} // Show user's location on the map
-      >
-        {/* Marker for User Location */}
-        {userLocation && (
-          <Marker
-            coordinate={userLocation}
-            title="Your Location"
-            description="This is where you are"
-          />
-        )}
-      </MapView>
+      {/* Bordered container for the map */}
+      <View style={styles.mapContainer}>
+        <MapView
+          style={styles.map}
+          initialRegion={region}
+          showsUserLocation={true} // Show user's location on the map
+        >
+          {/* Marker for User Location */}
+          {userLocation && (
+            <Marker
+              coordinate={userLocation}
+              title="Your Location"
+              description="This is where you are"
+            />
+          )}
+        </MapView>
+      </View>
 
       {/* Notification Icon */}
       <TouchableOpacity
@@ -101,10 +104,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: 'blue',
+  },
+  mapContainer: {
+    width: '90%', // Adjust the width as needed
+    height: '70%',
+    borderWidth: 2, // Border width for the container
+    borderColor: 'gray', // Border color
+    borderRadius: 10, // Rounded corners
+    overflow: 'hidden', // Ensures the map is clipped inside the border
+    marginBottom: 50, // Margin between the map and other elements
   },
   map: {
     width: '100%',
-    height: '70%',
+    height: '100%',
+   
   },
   notificationButton: {
     position: 'absolute',
@@ -116,14 +130,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
     padding: 15,
     borderRadius: 5,
-    marginTop: -5,
-    width:300
+    width: 300,
+    marginTop:-60
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 35,
-    textAlign:'center'
+    textAlign: 'center',
   },
 });
 
