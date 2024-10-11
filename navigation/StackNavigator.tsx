@@ -157,12 +157,12 @@ const StackNavigator = () => {
       <Stack.Screen 
         name="Medicine" 
         component={Medicine} 
-        options={{ title: 'Medicine' }} 
+        options={{ title: 'ප්‍රථමාධාර' }} 
       />
       <Stack.Screen 
         name="Burn" 
         component={Burn} 
-        options={{ title: 'Burn' }} 
+        options={{ title: 'පියවර' }} 
       />
       
       <Stack.Screen 

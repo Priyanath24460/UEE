@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, TouchableOpacity, StyleSheet, Image, ScrollView, Animated } from 'react-native';
 import { db } from '../../config/FirebaseConfig';
@@ -6,6 +5,7 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import * as Linking from 'expo-linking';
 import { useRoute } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 
 interface Step {
   stepDescription: string;
@@ -90,6 +90,7 @@ const Burn = () => {
   const currentStep = steps[currentStepIndex];
 
   return (
+    
     <ScrollView contentContainerStyle={[styles.scrollViewContent, darkMode && styles.darkScrollViewContent]}>
       <View style={styles.toggleContainer}>
         <TouchableOpacity onPress={toggleDarkMode} style={styles.toggleButton}>
@@ -99,11 +100,11 @@ const Burn = () => {
       
       {steps.length > 0 ? (
         <>
-          <Text style={[styles.stepTitle, darkMode && styles.darkText]}>Step {currentStepIndex + 1} of {steps.length}</Text>
+          <Text style={[styles.stepTitle, darkMode && styles.darkText]}>පියවර {currentStepIndex + 1} - {steps.length}</Text>
 
-          {/* Progress Bar */}
+         
           <View style={styles.progressBarContainer}>
-            <Text style={[styles.progressText, darkMode && styles.darkText]}>Progress:</Text>
+            <Text style={[styles.progressText, darkMode && styles.darkText]}>ප්‍රගතිය:</Text>
             <View style={styles.progressBar}>
               <View
                 style={{
@@ -129,7 +130,7 @@ const Burn = () => {
             <Text style={[styles.stepDescription, darkMode && styles.darkText]}>{currentStep.stepDescription}</Text>
           </Animated.View>
 
-          {/* Navigation Buttons */}
+         
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               onPress={handlePreviousStep}
@@ -143,15 +144,18 @@ const Burn = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Emergency Button */}
+         
           <TouchableOpacity onPress={handleEmergencyCall} style={styles.emergencyButton}>
-            <Text style={styles.emergencyButtonText}>Call Emergency Services</Text>
+            <Text style={styles.emergencyButtonText}>හදිසි ඇමතුම්</Text>
           </TouchableOpacity>
         </>
       ) : (
         <Text style={[styles.noStepsMessage, darkMode && styles.darkText]}>No steps available.</Text>
       )}
     </ScrollView>
+  
+  
+    
   );
 };
 
@@ -266,3 +270,4 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
 });
+
