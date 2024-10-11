@@ -18,7 +18,7 @@ interface Ambulance {
       lng: number;
     };
   };
-  distance?: number; // Optional because we calculate it later
+  distance?: number; 
 }
 
 const FindAmbulanceScreen = () => {
@@ -74,17 +74,58 @@ const FindAmbulanceScreen = () => {
     },
     {
       id: '4',
-      name: 'new',
-      vicinity: 'Mapalagama Rd, Maththaka.',
+      name: 'සහන සැරිය',
+      vicinity: 'Weliwita Rd, Malabe.',
       contactNumber: '112',
       available: true,
       geometry: {
         location: {
-          lat: 6.22467699064318,
-          lng: 80.28645466441223,
+          lat: 6.9164379521187485,
+          lng: 79.97083215559165,
         },
       },
     },
+
+    {
+      id: '5',
+      name: 'Ambulance 1990',
+      vicinity: 'Gemunupura Rd,2nd Lane , Malabe.',
+      contactNumber: '1990',
+      available: true,
+      geometry: {
+        location: {
+          lat: 6.916770188683331,
+          lng: 79.97455596422226,
+        },
+      },
+    },
+    {
+      id: '6',
+      name: 'සුව සැරිය',
+      vicinity: 'Kaduwela Rd , Pittugala.',
+      contactNumber: '1988',
+      available: true,
+      geometry: {
+        location: {
+          lat: 6.910390652272332,
+          lng: 79.97179915352022,
+        },
+      },
+    },
+    {
+      id: '7',
+      name: 'අසනීප සෙවන',
+      vicinity: 'Kaduwela Rd , Kothalawala.',
+      contactNumber: '118',
+      available: false,
+      geometry: {
+        location: {
+          lat: 6.919737177290993,
+          lng: 79.97560630485096,
+        },
+      },
+    },
+   
   ];
 
   // Function to calculate distance between two coordinates

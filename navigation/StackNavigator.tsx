@@ -14,12 +14,26 @@ import AddEmergencySituationForm from '@/screens/firstAid/AddEmergencySituationF
 import { NavigationContainer } from '@react-navigation/native';
 import { ParamListBase } from '@react-navigation/native';
 
+import LogoDisplay from '@/screens/LogoDisplay';
 
 export type Hospital = {
   name: string;
   location?: string;
   // Add other fields as necessary
 }
+// Define the PharmacyData type
+export type PharmacyData = {
+  id: string; // Define the properties as needed
+  name: string;
+  phone: string;
+  address: string;
+  bankDetails: {
+    bank: string;
+    branch: string;
+    accountNumber: string;
+    accountHolderName: string;
+  };
+};
 
 import Pharmacy from '@/screens/donations/Pharmacy';
 import Upload from '@/screens/donations/UploadSlip';
@@ -29,6 +43,7 @@ import PharmacySignUp from '@/screens/donations/PharmacySignUp';
 
 export type RootStackParamList = {
 
+  LogoDisplay:undefined
    Login:undefined;
    Register:undefined;
    Home:undefined;
@@ -40,13 +55,17 @@ export type RootStackParamList = {
    //Ambulance
    FindAmbulanceScreen:undefined;
    MapScreen:undefined;
-   Pharmacy: undefined;
-   Upload: { id: string; name: string };
+
+   //donations
+   Pharmacy: { pharmacyData: PharmacyData };
+   Upload: { id: string; name: string; amount:number };
    DonationPool: undefined;
    PharmacySignUp: undefined;
    Medicine:undefined;
+
    Burn:{ situationId: string };
    AddEmergencySituationForm: undefined;
+
   };
   const Stack = createStackNavigator<RootStackParamList>();
 
@@ -54,24 +73,31 @@ export type RootStackParamList = {
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Login"
+    <Stack.Navigator initialRouteName="LogoDisplay"
     
     screenOptions={{
     
       headerStyle: styles.header,  // Apply header styles
       headerTintColor: '#fff',     // Text color
-      headerTitleStyle: styles.headerTitle,  // Title styles
+      headerTitleStyle: styles.headerTitle,  // Title styles       
     }}
     >
         <Stack.Screen 
+        name="LogoDisplay" 
+        component={LogoDisplay} 
+        options={{ title: '' }} 
+      />
+
+
+        <Stack.Screen 
         name="Login" 
         component={Login} 
-        options={{ title: 'Login' }} 
+        options={{ title: '' }} 
       />
       <Stack.Screen 
         name="Register" 
         component={Register} 
-        options={{ title: 'Register' }} 
+        options={{ title: '' }} 
       />
 
 
@@ -94,29 +120,27 @@ const StackNavigator = () => {
         options={{ title: 'Add Review' }} // Title for the review page
       />
 
+     <Stack.Screen
+       name='Pharmacy'
+       component={Pharmacy}
+        options={{ title: 'Pharmacy' }}
+       />
       <Stack.Screen
-        name='Pharmacy'
-        component={Pharmacy}
-        options={{title: 'Pharmacy'}}
-      />
-
-      <Stack.Screen
-        name='Upload'
+       name='Upload'
         component={Upload}
-        options={{title: 'Upload'}}
-      />
-
+        options={{ title: 'Upload' }}
+       />
       <Stack.Screen
         name='DonationPool'
         component={DonationPool}
-        options={{title: 'DonationPool'}} 
+        options={{ title: 'DonationPool' }} 
+      />
+      <Stack.Screen
+        name='PharmacySignUp'
+        component={PharmacySignUp}
+        options={{ title: 'PharmacySignUp' }}
       />
 
-      <Stack.Screen
-      name='PharmacySignUp'
-      component={PharmacySignUp}
-      options={{title: 'PharmacySignUp'}}
-      />
       
       <Stack.Screen 
         name="FindAmbulanceScreen" 

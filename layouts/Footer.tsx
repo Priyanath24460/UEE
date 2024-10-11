@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
 
   return (
     <View style={styles.footerContainer}>
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
+      <TouchableOpacity onPress={() => navigation.navigate('MapScreen')} style={styles.iconButton}>
       <FontAwesome5 name="ambulance" size={24} color="#ffffff" />
         <Text style={{ color: '#ffffff' }}>ගිලන්රථ</Text>
       </TouchableOpacity>
