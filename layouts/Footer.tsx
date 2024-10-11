@@ -32,7 +32,7 @@ const Footer: React.FC = () => {
 
       
 
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.iconButton}>
+      <TouchableOpacity onPress={() => navigation.navigate('DonationPool')} style={styles.iconButton}>
       <FontAwesome5 name="donate" size={24} color="#ffffff" />
         <Text style={{ color: '#ffffff' }}>පරිත්‍යාගය</Text>
       </TouchableOpacity>

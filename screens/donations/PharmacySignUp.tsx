@@ -31,9 +31,9 @@ const PharmacySignUp = () => {
   const [accountHolderName, setAccountHolderName] = useState<string>('');
 
   const bankOptions = [
-    { label: 'Bank of Ceylon', value: 'BOC' },
-    { label: 'Commercial Bank', value: 'COM' },
-    { label: 'Hatton National Bank', value: 'HNB' },
+    { label: 'Bank of Ceylon', value: 'Bank of Ceylon' },
+    { label: 'Commercial Bank', value: 'Commercial Bank' },
+    { label: 'Hatton National Bank', value: 'Hatton National Bank' },
     // Add more banks as needed
 ];
 
@@ -158,7 +158,8 @@ const PharmacySignUp = () => {
         // Store limited information in 'pharmacyDetails' collection
         await setDoc(doc(db, 'pharmacyPool', user.uid), {
             pharmacyId: user.uid,   // Pharmacy ID
-            name,                   // Pharmacy name
+            name,
+            address,                   // Pharmacy name
             bankDetails: {
                 bank,
                 branch,
@@ -181,36 +182,34 @@ const PharmacySignUp = () => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Pharmacy Registration</Text>
-        <Text style={styles.label}>Pharmacy Name</Text>
+      <View style={styles.formContainer}>
+      <Text style={styles.title}>ලියාපදිංචි කරන්න</Text>
+
         <TextInput
           style={styles.input}
-          placeholder="Enter Pharmacy Name"
+          placeholder="Pharmacy Name"
           value={name}
           onChangeText={setName}
         />
 
-        <Text style={styles.label}>Phone Number</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter Phone Number"
+          placeholder="Phone Number"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
         />
 
-        <Text style={styles.label}>Address</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter Address"
+          placeholder="Address"
           value={address}
           onChangeText={setAddress}
         />
 
-        <Text style={styles.label}>Pharmacy License Number</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter License Number"
+          placeholder="Pharmacy License Number"
           value={license}
           onChangeText={setLicense}
         />
@@ -220,8 +219,9 @@ const PharmacySignUp = () => {
         <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
           <Text>Select License Image</Text>
         </TouchableOpacity>
-
-        <Text style={styles.label}>Bank</Text>
+        <Text style={styles.label1}>Bank Details</Text>
+        <View style={styles.hr} />
+        
                 <RNPickerSelect
                     onValueChange={(value: React.SetStateAction<string | null>) => setBank(value)}
                     items={bankOptions}
@@ -229,34 +229,29 @@ const PharmacySignUp = () => {
                     placeholder={{ label: 'Select Bank', value: null }}
                 />
 
-                <Text style={styles.label}>Branch</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter Branch Name"
+                    placeholder="Branch Name"
                     value={branch}
                     onChangeText={setBranch}
                 />
 
-                <Text style={styles.label}>Account Number</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter Account Number"
+                    placeholder="Account Number"
                     value={accountNumber}
                     onChangeText={setAccountNumber}
                     keyboardType="number-pad"
                 />
 
-                <Text style={styles.label}>Account Holder Name</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter Account Holder Name"
+                    placeholder="Account Holder Name"
                     value={accountHolderName}
                     onChangeText={setAccountHolderName}
                 />
-
-
-        <Text style={styles.label}>Email</Text>
-        <TextInput
+          <View style={styles.hr} />
+          <TextInput
           style={styles.input}
           placeholder="Enter Email"
           value={email}
@@ -265,7 +260,6 @@ const PharmacySignUp = () => {
           autoCapitalize="none"
         />
 
-        <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter Password"
@@ -273,7 +267,6 @@ const PharmacySignUp = () => {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <Text style={styles.label}>Confirm Password</Text>
         <TextInput
           style={styles.input}
           placeholder="Re-Enter Password"
@@ -285,75 +278,86 @@ const PharmacySignUp = () => {
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
+        </View>
       </ScrollView>
+      
     </View>
   );
 };
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
         fontSize: 18,
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: '#1b2785',
-        borderRadius: 10,
-        color: '#1b2785',
-        marginBottom: 20,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 15,
+        backgroundColor: '#fff',
     },
     inputAndroid: {
         fontSize: 18,
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: '#1b2785',
-        borderRadius: 10,
-        color: '#1b2785',
-        marginBottom: 20,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 15,
+        backgroundColor: '#fff',
     },
 });
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     padding: 20,
-    width: 350,
-    marginLeft: 35,
-    marginTop: 20,
-    borderWidth: 2,
-    borderColor: '#1b2785',
-    borderRadius: 30,
+    backgroundColor: '#ADD8E6',
   },
   title: {
-    fontSize: 50,
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#1b2785',
-    fontWeight: 'bold',
   },
   input: {
-    height: 50,
-    borderColor: '#1b2785',
     borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    color: '#1b2785',
-    borderRadius: 10,
-    fontSize: 18,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+    backgroundColor: '#fff',
   },
   label: {
-    color: '#1b2785',
-    fontSize: 20,
+    color: 'black',
+    fontSize: 15,
+  },
+  label1: {
+    color: 'black',
+    fontSize: 15,
+    textAlign:'center'
   },
   registerButton: {
-    backgroundColor: '#1E90FF',
-    paddingVertical: 15,
+    backgroundColor: '#4caf50',
+    padding: 15,
     borderRadius: 10,
-    marginTop: 10,
+    alignItems: 'center',
   },
   registerButtonText: {
     color: '#fff',
     fontSize: 20,
-    textAlign: 'center',
     fontWeight: 'bold',
+  },
+  formContainer: {
+    borderWidth: 2, // Transparent border
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Slightly transparent form background
+    elevation: 5, // Shadow for Android
+    shadowColor: '#000', // Shadow for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  hr: {
+    borderBottomColor: '#ccc',  // Light grey color
+    borderBottomWidth: 1,       // Set the line thickness
+    marginVertical: 10,         // Space around the line
   },
   uploadButton: {
     backgroundColor: '#e0e0e0',

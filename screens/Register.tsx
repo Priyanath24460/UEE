@@ -101,10 +101,15 @@ const Register = () => {
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>ලියාපදිංචි කරන්න</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('PharmacySignUp')}>
+      <Text style={styles.pharmacy}>ෆාමසි ලියාපදිංචිය සදහා</Text>
+      </TouchableOpacity>
       </View>
 
       {/* Half-circle at the bottom of the page */}
       <View style={styles.halfCircle} />
+      
+      
     </View>
   );
 };
@@ -115,6 +120,12 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
     backgroundColor: '#ADD8E6', // Light blue background color
+  },
+  pharmacy: {
+    color: '#108292',
+    fontWeight: 'bold',
+    textAlign:'center',
+    marginTop:10
   },
   formContainer: {
     borderWidth: 2, // Transparent border
