@@ -1,5 +1,4 @@
-// Upload.tsx
-import { View, Text, Alert, Image, TouchableOpacity, StyleSheet, Button } from "react-native";
+import { View, Text, Alert, Image, TouchableOpacity, StyleSheet, Button, ScrollView, ActivityIndicator } from "react-native";
 import React, { useState } from "react";
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, NavigationProp, RouteProp } from '@react-navigation/native';
@@ -9,6 +8,7 @@ import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { TextInput } from "react-native-gesture-handler";
 import { getAuth } from "firebase/auth";
+import { LinearGradient } from 'expo-linear-gradient';
 
 type UploadNavigationProp = NavigationProp<RootStackParamList, 'Upload'>;
 
@@ -21,7 +21,7 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
     const { id: pharmacyId, name: pharmacyName, amount: donationAmount } = route.params;
 
     //bank details
-    const [bankDetails, setBankDetails] = useState<{ accountNumber: string, bankName: string, branch: string } | null>(null);
+    const [bankDetails, setBankDetails] = useState<{ accountNumber: string, bank: string, branch: string } | null>(null);
 
     // Inputs
     const [name, setName] = useState('');
@@ -33,17 +33,17 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
     //fetch
     React.useEffect(() => {
         const fetchBankDetails = async () => {
-            try{
+            try {
                 const docRef = doc(db, 'pharmacies', pharmacyId);
                 const docSnap = await getDoc(docRef);
 
-                if(docSnap.exists()){
+                if (docSnap.exists()) {
                     const data = docSnap.data();
                     setBankDetails(data.bankDetails);
-                }else{
+                } else {
                     console.log("No such document!");
                 }
-            }catch(error){
+            } catch (error) {
                 console.error("Error fetching bank details:", error);
             }
         };
@@ -111,36 +111,20 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
                 imageUrl: uploadedImageUrl,
                 pharmacyId: pharmacyId,
                 userId: userId,
+                status: 'pending', // Add status field to track donation status
                 timestamp: new Date(),
             });
     
-            // Fetch the pharmacy's push token from Firestore
-            const pharmacyDocRef = doc(db, 'pharmacies', pharmacyId);
-            const pharmacyDocSnap = await getDoc(pharmacyDocRef);
-    
-            if (pharmacyDocSnap.exists()) {
-                const pharmacyData = pharmacyDocSnap.data();
-                const pharmacyPushToken = pharmacyData?.pushToken;
-    
-                if (pharmacyPushToken) {
-                    // Send notification to the pharmacy to approve the donation
-                    await sendPushNotification(pharmacyPushToken, name, donation);
-                }
-            } else {
-                console.log("No such pharmacy document!");
-            }
-    
-            Alert.alert("Donation submitted for approval!");
-            setName('');
-            setPhoneno('');
-            setDonation('');
-            setImage(null);
+            // After form submission, navigate to status screen
+            navigation.navigate('StatusScreen', { donationId: docRef.id, status: 'pending' });
+
     
         } catch (error) {
             console.error("Error uploading data: ", error);
             Alert.alert('Error uploading data or image.');
         }
     };
+    
     
     // Modify the sendPushNotification function as needed
     const sendPushNotification = async (expoPushToken: string, donorName: string, donationAmount: string) => {
@@ -161,10 +145,17 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
             body: JSON.stringify(message),
         });
     };
-    
 
     return (
+        <LinearGradient
+                colors={['#007791', '#ffffff']} // Start with the first color, then transition to the second color
+                style={styles.backgroundGradient}
+                locations={[0, 0.80]} // Control where the first color ends and second begins (50% point)
+        >
+            {/* Scrollable Section */}
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
+            
             {/* Header Section */}
             <Text style={styles.headerText}>{pharmacyName}</Text>
             
@@ -172,25 +163,45 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
             <View style={styles.amountContainer}>
                 <Text style={styles.amountText}>රු.{donationAmount}</Text>
             </View>
-            
+
+            {/* Bank Details Section */}
+            <View style={styles.bankDetailsContainer}>
+                {bankDetails ? (
+                    <>
+                        <Text style={styles.bankDetailText}>බැංකුව : {bankDetails.bank}</Text>
+                        <Text style={styles.bankDetailText}>බැංකු ශාඛාව : {bankDetails.branch}</Text>
+                        <Text style={styles.bankDetailText}>ගිණුම් අංකය : {bankDetails.accountNumber}</Text>
+                    </>
+                ) : (
+                    <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#0018A8" />
+                    <Text>Loading ...</Text>
+                    </View>
+                )}
+            </View>
+        </View>
+        <View style={styles.container2}>    
             {/* Input Form Section */}
             <View style={styles.formContainer}>
-                <Text>Name</Text>
+                <Text style={styles.inputLabel}>නම</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Input Name"
                     value={name}
                     onChangeText={setName}
                 />
-                <Text>Phone Number</Text>
+                <Text style={styles.inputLabel}>දුරකතන අංකය
+                </Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Input Phone Number"
                     value={phoneno}
                     onChangeText={setPhoneno}
+                    keyboardType="number-pad"
                 />
 
-                <Text>Donation Amount</Text>
+                <Text style={styles.inputLabel}>පරිත්‍යාග මුදල
+                </Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Input Donation amount"
@@ -198,51 +209,99 @@ const Upload = ({ route }: { route: UploadRouteProp }) => {
                     onChangeText={setDonation}
                 />
 
-
                 {/* Image Preview */}
                 {image && <Image source={{ uri: image }} style={styles.image} />}
 
                 {/* Pick Image Button */}
+                <Text style={styles.inputLabel}>බැංකු රිසිට්පත
+                </Text>
                 <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-                    <Text>Select Image</Text>
+                    <Text>රිසිට්පත තෝරා ගැනීමට
+                    </Text>
                 </TouchableOpacity>
+                {/* Submit button */}
+                <View style={styles.SubmitButtonc}>
+                <TouchableOpacity style={styles.SubmitButton} onPress={handleSubmit}>
+                    <Text style={{color: '#ffffff', fontWeight: 'bold', fontSize: 18,}}>යොමු කරන්න
+                    </Text>
+                </TouchableOpacity>
+                </View>
             </View>
             
-            {/* Submit button */}
-            <Button title="Submit" onPress={handleSubmit} />
         </View>
+        </ScrollView>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         padding: 20,
-        backgroundColor: '#b3e5fc',
+    },
+    loadingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'space-between',
+        paddingBottom: 20,
+    },
+    container2: {
+        padding: 0,
+    },
+    backgroundGradient: {
+        marginTop:0,
+        marginBottom: 20,
+        flex: 1,
     },
     headerText: {
         fontSize: 20,
+        color:'white',
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 20,
     },
     amountContainer: {
-        backgroundColor: '#e0f7fa',
+        backgroundColor: 'rgba(224, 247, 250, 0.4)',
         padding: 10,
         alignItems: 'center',
         marginBottom: 20,
-        borderRadius: 10,
+        borderRadius: 40,
     },
     amountText: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#d32f2f',
     },
+    //# , 
+    bankDetailsContainer: {
+        marginBottom: 20,
+        backgroundColor: '#A3C1AD',
+        padding: 15,
+        borderRadius: 20,
+        shadowColor:'black',
+        shadowOpacity:0.5,
+    },
+    bankDetailText: {
+        fontSize: 18,
+        marginBottom: 3,
+        fontWeight:'bold'
+    },
     formContainer: {
         backgroundColor: '#ffffff',
         padding: 20,
-        borderRadius: 10,
+        borderRadius: 40,
         marginBottom: 20,
+        width: '100%',
+        shadowOpacity:0.5,
+        paddingHorizontal: 50
+    },
+    inputLabel:{
+        fontSize: 18,
+        paddingBottom:10,
+        fontWeight: 'bold',
     },
     input: {
         borderWidth: 1,
@@ -259,9 +318,21 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 20,
     },
+    SubmitButton: {
+        alignItems: 'center',
+        backgroundColor: '#007791',
+        color:'#ffffff',
+        width: 100,
+        padding: 10,
+        borderRadius: 15,
+        fontSize: 20,
+    },
+    SubmitButtonc: {
+        alignItems: 'center',
+    },
     image: {
-        width: 200,
-        height: 200,
+        width: 100,
+        height: 100,
         marginBottom: 10,
     },
 });
