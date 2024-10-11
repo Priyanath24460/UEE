@@ -145,7 +145,7 @@ const StackNavigator = () => {
       <Stack.Screen 
         name="FindAmbulanceScreen" 
         component={FindAmbulanceScreen} 
-        options={{ title: 'FindAmbulanceScreen' }} 
+        options={{ title: 'ගිලන්රථ පිටුව' }} 
       />
        <Stack.Screen 
         name="MapScreen" 

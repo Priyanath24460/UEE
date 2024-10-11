@@ -208,7 +208,7 @@ const FindAmbulanceScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Find Nearby Ambulances</Text>
+      <Text style={styles.title}>අසල ගිලන් රථයක් සොයා ගන්න</Text>
 
       {location ? (
         <MapView
@@ -289,6 +289,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     margin: 10,
+    color:'green'
   },
   map: {
     width: '100%',
