@@ -21,7 +21,7 @@ import { db } from '../../config/FirebaseConfig'; // Path to your Firebase confi
 import { auth } from '../../config/FirebaseConfig';
 import { useNavigation, NavigationProp, useRoute } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/StackNavigator';
-import Footer from '@/layouts/Footer';
+import Footer from '../../layouts/Footer'
 
 type ReviewNavigationProp = NavigationProp<RootStackParamList, 'Home'>;
 
