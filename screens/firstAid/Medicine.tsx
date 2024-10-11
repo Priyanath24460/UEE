@@ -4,6 +4,7 @@ import { db } from '../../config/FirebaseConfig'; // Import your Firebase config
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigation, NavigationProp } from '@react-navigation/native'; // Import useNavigation and NavigationProp
 import { RootStackParamList } from '../../navigation/StackNavigator'; // Update the path to your navigation file
+import Footer from '@/layouts/Footer';
 
 interface EmergencySituation {
   id: string;
@@ -87,6 +88,7 @@ const Medicine = () => {
           <Text style={styles.emptyMessage}>No results found.</Text>
         )}
       </ScrollView>
+      <Footer/>
     </View>
   );
 };
